@@ -1,11 +1,15 @@
 --- #YAML:1.0
 CustomTitle: '%ip:%port [%nick @ %chan / %status]'
 TitleType: Vyc
-autoanswer:
+autoanswer: ''
 autoanswer_on: 1
-debug: 0
+completionChar: ', '
+debug: 1
+hPanedPos: 325
+horizSize: 400
 nick: Chatter
 port: 8167
 refresh: 30
 sorting: ASCENDING
 status: 0
+vertSize: 300

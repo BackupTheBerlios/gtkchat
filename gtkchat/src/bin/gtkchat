@@ -14,11 +14,15 @@ use YAML qw(LoadFile DumpFile);
 use Sys::HostIP;
 use Data::Dumper;
 
+# Initializing termination signals
+$SIG{TERM} = \&gtk_main_quit;
+$SIG{INT} = \&gtk_main_quit;
+
 my $progname = 'GtkChat';
 my $execname = lc $progname;
 my $achan = '#Main';
-my $ver = '0.42';
-my $codename = 'Bugs unleashed';
+my $ver = '0.50';
+my $codename = 'Introducing features';
 
 my $sharedir = "$FindBin::Bin/../share/$execname/";
 my $cfgdir = "$ENV{'HOME'}/.$execname/";
@@ -37,8 +41,8 @@ $gladexml->signal_autoconnect_from_package('main');
 my $config = cfg_load();
 
 # The non-resizing userlist.
-$gladexml->get_widget('hPaned')->child1_resize(1);
-$gladexml->get_widget('hPaned')->child2_resize(0);
+$gladexml->get_widget('hPaned')->child1_resize(TRUE);
+$gladexml->get_widget('hPaned')->child2_resize(FALSE);
 
 
 # textbuffers hash
@@ -96,15 +100,33 @@ $gladexml->get_widget('eStatus')->signal_connect
 
 # Misc events
 my $usertree = $gladexml->get_widget('UserTree');
-my $select = $usertree->get_selection;
-my $treestore = $usertree->get_model;
-$usertree->signal_connect('row-activated' => sub {
-	user_selected($select, $usertree, $treestore);
+$usertree->signal_connect_after('row-activated' => sub {
+	compose_msg(user_selected());
 } );
+# popup menu on userlist
+$usertree->signal_connect('button-release-event' => sub { # {{{
+	my $event = $_[1];
+	if ($event->button == 3) {
+		my $gUsers = Gtk2::GladeXML->new_from_buffer($gladebuf, 'pmUsers');
+		$gUsers->signal_autoconnect_from_package('main');
+		$gUsers->get_widget('pmUsers')->popup(undef, undef, undef, 
+			undef, $event->button, $event->time);
+		return TRUE;
+	}
+	else {
+		return FALSE;
+	}
+} ); # }}}
 
 my @text_history = ('');
 my ($title, $tRefresh);
 my $history_item = 0;
+
+# If IP config is broken - warn user
+Glib::Idle->add(sub {
+	pref_win(TRUE);
+	return FALSE;
+}) if $vyc->{bad_ip};
 
 wMain_update(); # update title
 Gtk2->main; # go and away!
@@ -114,12 +136,6 @@ sub init_TextBuffer { # {{{
 	$buffer{$name} = Gtk2::TextBuffer->new;
 	$buffer{$name}->create_mark('end', $buffer{$name}->get_end_iter, FALSE);
 } # }}}
-sub scroll {
-	my $name = '#Main';
-	$buffer{$name}->create_mark('end', $buffer{$name}->get_end_iter, FALSE);
-	$gladexml->get_widget('TextView')->scroll_to_mark(
-		$buffer{$name}->get_mark('end'), 0.0, TRUE, 0, 1);
-}
 sub cfg_load { # {{{
 	my $restore = shift;
 	# Let's load cfg
@@ -145,6 +161,11 @@ sub cfg_load { # {{{
 			. $config->{TitleType})->get_text;
 	} # }}}
 	
+	# Restoring sizes
+	$gladexml->get_widget('wMain')->resize($config->{horizSize},
+		$config->{vertSize});
+	$gladexml->get_widget('hPaned')->set_position($config->{hPanedPos});
+	
 	return $config;
 } # }}}
 sub cfg_save { # {{{
@@ -162,7 +183,7 @@ sub cfg_save { # {{{
 sub error_win { # {{{
 	my ($text, $critical) = @_;
 	$gladexml->get_widget('wMain')->destroy;
-	my $gError = $gladexml->new_from_buffer($gladebuf, 'dError');
+	my $gError = Gtk2::GladeXML->new_from_buffer($gladebuf, 'dError');
 	my $dError = $gError->get_widget('dError');
 	$gError->get_widget('lError')->set_text($text);
 	if ('close' eq $dError->run) {
@@ -212,6 +233,10 @@ sub do_stuff { # {{{
 			$buffer{$chan});
 		add_user($who) if !find_user($who);
 	} # }}}
+	elsif ($type eq "beep_ack") { # {{{
+		my ($who) = @r;
+		add_text("--- $who received beep.");
+	} # }}}
 	elsif ($type eq "part") { # {{{
 		my ($who, $chan) = @r;
 		add_text("<-- $who parted $chan", $buffer{$chan});
@@ -240,6 +265,51 @@ sub do_stuff { # {{{
 		my ($old, $new) = @r;
 		add_text("--- $old changed nick to $new");
 		change_user($old, $new);	
+	} # }}}
+	elsif ($type eq 'info_ack') { # {{{
+		my ($from, $host, $user, $ip, $aa, @chans) = @r;
+		my $gInformation = Gtk2::GladeXML->new_from_buffer($gladebuf,
+			'wInformation');
+		my $wInformation = $gInformation->get_widget('wInformation');
+		$gInformation->get_widget('lInfoNickname')->set_text($from);
+		$gInformation->get_widget('lInfoUsername')->set_text($user);
+		$gInformation->get_widget('lInfoHostname')->set_text($host);
+		$gInformation->get_widget('lInfoIpAddress')->set_text($ip);
+		$gInformation->get_widget('iInfoStatus')->set_from_pixbuf(
+			$pix{'1' . $vyc->{users}{$from}{status}}
+		);
+		$gInformation->get_widget('lInfoStatus')->set_text(
+			$vyc->num2status($vyc->{users}{$from}{status})
+		);
+
+		if ($vyc->{users}{$from}{status} == 0 || !$aa) {
+			$gInformation->get_widget('lInfoAutoanswer')->hide;
+			$gInformation->get_widget('lInfoAutoanswerLabel')->hide;
+		}
+		else {
+			$gInformation->get_widget('lInfoAutoanswer')->set_text($aa);
+		}
+		
+		my $Channels = Gtk2::SimpleList->new_from_treeview(
+			$gInformation->get_widget('tvInfoChannels'),
+			'Channel'	=>	'text'
+		); # create simplelist
+		push @{$Channels->{data}}, $_ for @chans;
+
+		$wInformation->set_title("$from information");
+
+		$gInformation->get_widget('bInfoClose')->signal_connect(
+			'clicked' => sub {
+				$wInformation->destroy;
+				undef $gInformation;
+			}
+		);
+		
+		$wInformation->show;
+	} # }}}
+	elsif ($type eq 'remote_exec_ack') { # {{{
+		my ($from, $text) = @r;
+		add_text("--- Got remote execution acknowledment from $from: $text");
 	} # }}}
 	elsif ($type eq ("msg" || "mass")) { # {{{
 		unless ($vyc->{'users'}{$vyc->{'nick'}}{'status'} == 3) {
@@ -286,10 +356,13 @@ sub do_stuff { # {{{
 	return 1;
 } # }}}
 sub user_selected { # {{{
-	my ($selection, $treeview, $treestore) = @_;
+	my $selection = $usertree->get_selection;
 	my $row = $selection->get_selected_rows;
+	
+	my $treestore = $usertree->get_model;
 	my $iter = $treestore->get_iter($row);
-	compose_msg($treestore->get($iter, 1));
+	
+	return $treestore->get($iter, 1);
 } # }}}
 sub compose_msg { # {{{
 	my ($user, $msg) = @_;
@@ -342,6 +415,40 @@ sub get_pic { # {{{
 	return $pix{ $vyc->{'users'}{$user}{'active'}
 		.$vyc->{'users'}{$user}{'status'} };
 } # }}}
+sub on_pmi_Message_activate { # {{{
+	compose_msg(user_selected());
+} # }}}
+sub on_pmi_Beep_activate { # {{{
+	$vyc->beep(user_selected());
+} # }}}
+sub on_pmi_Information_activate { # {{{
+	$vyc->info(user_selected());
+} # }}}
+sub on_pmi_Remote_Execute_activate { # {{{
+	my $user = user_selected();
+	my $gRemoteExec = Gtk2::GladeXML->new_from_buffer($gladebuf, 'wRemoteExec');
+	my $wRemoteExec = $gRemoteExec->get_widget('wRemoteExec');
+	$wRemoteExec->set_title('Execute command at ' . $user);
+	$gRemoteExec->get_widget('bRemoteExecExecute')->signal_connect(
+		'clicked' => sub {
+			my $cmd = $gRemoteExec->get_widget('eRemoteExecCmd')->get_text;
+			my $pass = $gRemoteExec->get_widget('eRemoteExecPass')->get_text;
+			if ($cmd) {
+				$vyc->remote_exec($user, $cmd, $pass);
+				$wRemoteExec->destroy;
+				undef $gRemoteExec;
+			}
+		}
+	);
+	$gRemoteExec->get_widget('bRemoteExecCancel')->signal_connect(
+		'clicked' => sub {
+			$wRemoteExec->destroy;
+			undef $gRemoteExec;
+		}
+	);
+
+	$wRemoteExec->show;
+} # }}}
 sub on_eChannel_activate { # {{{
 	return 'ok';
 } # }}}
@@ -373,7 +480,7 @@ sub on_bJoinChannel_clicked { # {{{
 	
 } # }}}
 sub about_win { # {{{
-    my $gAbout = $gladexml->new_from_buffer($gladebuf, 'dAbout');
+    my $gAbout = Gtk2::GladeXML->new_from_buffer($gladebuf, 'dAbout');
     my $dAbout = $gAbout->get_widget('dAbout');
     $gAbout->get_widget('lHeader')->set_markup("<span size=\"xx-large\"><b>"
     	."$progname $ver</b></span>\n\"$codename\"");
@@ -429,6 +536,9 @@ sub on_eTalk_activate { # {{{
 		elsif ($text eq '/dump') {
 			add_text(Dumper($vyc));
 		}
+		elsif ($text =~ /\/dump (.*)$/) {
+			add_text(Dumper($1));
+		}
 		elsif ($text eq '/debug') {
 			add_text(Dumper($vyc->{'debug'}));
 		}
@@ -446,7 +556,7 @@ sub on_eTalk_activate { # {{{
 				. "/topic [topic] - gets/sets topic\n"
 				. "/eval perl_cmd - evals expresion as perl\n"
 				. "/system shell_cmd - executes command\n"
-				. "/dump - dumps \$vyc object\n"
+				. "/dump [var]- dumps any var/object (\$vyc by default)\n"
 				. "/debug [level] - gets/sets debug level\n"
 				. "/save - saves config\n"
 				. "/quit - exits"
@@ -465,8 +575,27 @@ sub on_eTalk_activate { # {{{
 } # }}}
 sub on_eTalk_key_press_event { # {{{
 	my $event = $_[1];
-	# We manage up and down keypress
-	if ( # {{{
+	# We manage these keypresses
+	if ($event->keyval == $Gtk2::Gdk::Keysyms{Tab}) {
+		my $text = $gladexml->get_widget('eTalk')->get_text;
+		$text =~ /(.*)$/;
+		my $last = $1;
+		my @users = keys %{$vyc->{users}};
+		my @matches = grep /^$last/i, @users;
+		my $count = @matches;
+		if ($count == 1) {
+			my $eTalk = $gladexml->get_widget('eTalk');
+			$eTalk->set_text($matches[0] . $config->{completionChar});
+			$eTalk->set_position(-1);
+		}
+		else {
+			my $string;
+			$string .= $_." " for @matches;
+			add_text($string);
+		}
+		return TRUE;
+	}
+	elsif ( # {{{
 		$event->keyval == $Gtk2::Gdk::Keysyms{Up} ||
 		$event->keyval == $Gtk2::Gdk::Keysyms{Down}
 	) {
@@ -605,7 +734,7 @@ sub on_eStatus_changed { # {{{
 		my $autoanswer = '';
 
 		if ($status ne '0' && $config->{autoanswer_on}) {
-			my $gStatus = $gladexml->new_from_buffer($gladebuf, 'dStatus');
+			my $gStatus = Gtk2::GladeXML->new_from_buffer($gladebuf, 'dStatus');
 			my $dStatus = $gStatus->get_widget('dStatus');
 			my $eAutoAnswerMessage = $gStatus->get_widget('eAutoAnswerMessage');
 			$eAutoAnswerMessage->set_text(
@@ -627,9 +756,9 @@ sub on_eTopic_activate { # {{{
 	$vyc->topic($achan, $eTopic->get_text);
 } # }}}
 sub pref_win { # {{{
-	my $switch_to_net = shift;
+	my $switch_to_net = shift if $_[0] == 1;
 	# Hell this is messy... Creating window again.
-	my $gPref = $gladexml->new_from_buffer($gladebuf, 'dPref');
+	my $gPref = Gtk2::GladeXML->new_from_buffer($gladebuf, 'dPref');
 	my $dPref = $gPref->get_widget('dPref');
 
 	# We get these now, because if we don't change our selection and press OK 
@@ -652,6 +781,7 @@ sub pref_win { # {{{
 	}
 	$gPref->get_widget('cbAutoanswer')->set_active($config->{autoanswer_on});
 	$gPref->get_widget('sbRefresh')->set_value($config->{'refresh'});
+	$gPref->get_widget('eCompletionChar')->set_text($config->{completionChar});
 	$gPref->get_widget('sbPort')->set_value($vyc->{'port'});
 	$gPref->get_widget('ceIp')->set_text($vyc->{'localip'}); # }}}
 
@@ -677,9 +807,9 @@ sub pref_win { # {{{
 
 	# Do we wish to warn user about strange ip?
 	if ($switch_to_net) { # {{{
-		$gladexml->get_widget('nbPreferences')->set_current_page(1);
-		$gladexml->get_widget('lIpWarning')->show;
-		$gladexml->get_widget('iIpWarning')->show;
+		$gPref->get_widget('nbPreferences')->set_current_page(1);
+		$gPref->get_widget('lIpWarning')->show;
+		$gPref->get_widget('iIpWarning')->show;
 	} # }}}
 	
 	my $response = $dPref->run;
@@ -690,6 +820,8 @@ sub pref_win { # {{{
 		$config->{'CustomTitle'} = $gPref->get_widget('eTitleCustom')->get_text;
 		
 		$config->{'refresh'} = $gPref->get_widget('sbRefresh')->get_value;
+		$config->{completionChar} = 
+			$gPref->get_widget('eCompletionChar')->get_text;
 		my ($ceIp) = $gPref->get_widget('ceIp')->get_text 
 			=~ /^((\d{1,3}\.){3}\d{1,3})/;
 		$vyc->change_net($gPref->get_widget('sbPort')->get_value, $ceIp);
@@ -710,7 +842,11 @@ sub pref_win { # {{{
 	elsif ($response eq 'cancel') {
 		# If we ain't doing nothin' just destroy window
 		$dPref->destroy;
-	}    
+	}
+} # }}}
+sub on_ceIp_changed { # {{{
+	$gladexml->get_widget('iIpWarning')->hide;
+	$gladexml->get_widget('lIpWarning')->hide;
 } # }}}
 # Set userlist to ASC/DESC
 sub asc { # {{{
@@ -730,7 +866,17 @@ sub inactive { # {{{
 	$vyc->active(0);
 	wMain_update();
 } # }}}
+sub save_positions { # {{{
+	($config->{horizSize}, $config->{vertSize}) = 
+		$gladexml->get_widget('wMain')->get_size;
+	$config->{hPanedPos} = $gladexml->get_widget('hPaned')->get_position;
+	return FALSE;
+} # }}}
 # Quit chat
+sub quit_gtkchat { # {{{
+	save_positions();
+	gtk_main_quit();
+} # }}}
 sub gtk_main_quit { # {{{
 	# Save config
 	cfg_save();
