@@ -16,13 +16,11 @@ use Data::Dumper;
 my $progname = 'GtkChat';
 my $execname = lc $progname;
 my $achan = '#Main';
-my $ver = '0.40';
+my $ver = '0.41';
 my $codename = 'Bugs unleashed';
 
 my $sharedir = "$FindBin::Bin/../share/$execname/";
 my $cfgdir = "$ENV{'HOME'}/.$execname/";
-
-my $config = cfg_load();
 
 # Some GladeXML magic for fixing Glade bugs :/
 open (GLADE, "<", $sharedir . $execname . '.glade');
@@ -33,7 +31,10 @@ close (GLADE);
 $gladebuf =~ s/<property name="(pixbuf|icon)">/<property name="$1">${sharedir}pixmaps\//g;
 my $gladexml = Gtk2::GladeXML->new_from_buffer($gladebuf);
 $gladexml->signal_autoconnect_from_package('main');
-    
+
+# Loading config
+my $config = cfg_load();
+
 # The non-resizing userlist.
 $gladexml->get_widget('hPaned')->child1_resize(1);
 $gladexml->get_widget('hPaned')->child2_resize(0);
@@ -55,7 +56,12 @@ $vyc->{'debug'} = $config->{'debug'} || 0;
 $vyc->{'port'} = $config->{'port'};
 $vyc->{'localip'} = $config->{'localip'} if $config->{'localip'};
 $vyc->nick($config->{'nick'});
-$vyc->status($config->{'status'});
+if ($config->{autoanswer}) {
+	$vyc->status($config->{'status'}, $config->{autoanswer});
+}
+else {
+	$vyc->status($config->{'status'});
+}
 $vyc->startup();
 
 # the icons hash
@@ -70,7 +76,8 @@ $pix{'02'} = Gtk2::Gdk::Pixbuf->new_from_file($sharedir.'pixmaps/oAway.png');
 $pix{'03'} = Gtk2::Gdk::Pixbuf->new_from_file($sharedir.'pixmaps/oOff.png');
 
 $gladexml->get_widget('eNickname')->set_text($vyc->{'nick'}); #set nick
-my $UserList = Gtk2::SimpleList->new_from_treeview($gladexml->get_widget('UserTree'),
+my $UserList = Gtk2::SimpleList->new_from_treeview(
+	$gladexml->get_widget('UserTree'),
 		'Icon'	=>	'pixbuf',
 		'User'	=>	'text',
 ); # create simplelist
@@ -93,36 +100,56 @@ my $treestore = $usertree->get_model;
 $usertree->signal_connect('row-activated' => sub {
 	user_selected($select, $usertree, $treestore);
 } );
-my $tRefresh = Glib::Timeout->add($config->{'refresh'}*1000, \&tvUsers_refresh);
 
-my @text_history;
+my $ta = Glib::Timeout->add(1000*1, sub {
+	pref_win(TRUE);
+	return FALSE;
+});
+
+my (@text_history, $title, $tRefresh);
 my $history_item = 0;
 
 wMain_update(); # update title
 Gtk2->main; # go and away!
 
-sub cfg_update { # {{{
-	Glib::Source->remove($tRefresh);
-	$tRefresh = Glib::Timeout->add($config->{'refresh'}*1000,
-		\&tvUsers_refresh);
-} # }}}
 sub cfg_load { # {{{
 	my $restore = shift;
-	if (-e $cfgdir.$execname.'.cfg.yaml' and !$restore) {
-		return LoadFile($cfgdir.$execname.'.cfg.yaml');
+	# Let's load cfg
+	my $config;
+	if (-e $cfgdir.$execname.'.cfg.yaml' and !$restore) { # {{{
+		$config = LoadFile($cfgdir.$execname.'.cfg.yaml');
 	}
 	else {
-		return LoadFile($sharedir.$execname.'.cfg.yaml');
+		$config = LoadFile($sharedir.$execname.'.cfg.yaml');
+	} # }}}
+
+	# Refresh timer
+	Glib::Source->remove($tRefresh) if $tRefresh;
+	$tRefresh = Glib::Timeout->add($config->{'refresh'}*1000,
+		\&tvUsers_refresh);
+		
+	# Here we set our window title.
+	if ($config->{TitleType} eq 'Custom') { # {{{
+		$title = $config->{CustomTitle};
 	}
+	else {
+		$title = $gladexml->get_widget('lTitle' 
+			. $config->{TitleType})->get_text;
+	} # }}}
+	
+	return $config;
 } # }}}
 sub cfg_save { # {{{
 	mkdir $cfgdir unless -d $cfgdir or -e $cfgdir;
-	error_win("$cfgdir is file!\nCan't write configuration. Please remove that file.", 1) if -f $cfgdir;
-	if ($vyc->{'init'}) {
+	error_win("$cfgdir is file!\n"
+		. "Can't write configuration. "
+		. "Please remove that file.", 1) if -f $cfgdir;
+	if ($vyc->{'init'}) { # {{{
 		$config->{$_} = $vyc->{$_} for (qw(nick port localip));
-		$config->{'status'} = $vyc->{'users'}{$vyc->{'nick'}}{'status'};
-	}
-	DumpFile($cfgdir.$execname.'.cfg.yaml', $config);
+		$config->{autoanswer} = $vyc->{users}{$vyc->{nick}}{autoanswer};
+		$config->{status} = $vyc->{users}{$vyc->{nick}}{status};
+	} # }}}
+	DumpFile($cfgdir . $execname . '.cfg.yaml', $config);
 } # }}}
 sub error_win { # {{{
 	my ($text, $critical) = @_;
@@ -230,7 +257,7 @@ sub do_stuff { # {{{
 			# Signal for quote button.
 			$gMsg->get_widget('bQuote')->signal_connect('clicked' => sub { # {{{
 				$wMsg->destroy;
-				$msg =~ s/^/>/g;
+				$msg =~ s/^/\>/gm;
 				$msg = "\n$msg";
 				compose_msg($user, $msg);
 			} ); # }}}
@@ -238,6 +265,9 @@ sub do_stuff { # {{{
 			$gMsg->get_widget('bClose')->signal_connect('clicked' => sub { # {{{
 				$wMsg->destroy;
 			} ); # }}}
+
+			$wMsg->iconify if 
+				$vyc->{'users'}{$vyc->{'nick'}}{'status'} == (1 || 2);
 			$wMsg->show;
 		}
 	} # }}}
@@ -356,7 +386,7 @@ sub entry_press { # {{{
 #		$history_item++;
 #	}	
 } # }}}
-sub send_text { # {{{
+sub on_eTalk_activate { # {{{
 	my $chan = '#Main';
 	my $eTalk = $gladexml->get_widget('eTalk');
 	my $text = $eTalk->get_text;
@@ -370,10 +400,14 @@ sub send_text { # {{{
 		elsif ($text =~ /\/topic (.+)$/) {
 			$vyc->topic($achan, $1);
 		}
-		elsif ($text eq "/dump") {
+		elsif ($text =~ /\/eval (.*)$/) {
+			add_text("Evaluating: $1");
+			eval($1);
+		}
+		elsif ($text eq '/dump') {
 			add_text(Dumper($vyc));
 		}
-		elsif ($text eq "/debug") {
+		elsif ($text eq '/debug') {
 			add_text(Dumper($vyc->{'debug'}));
 		}
 		elsif ($text =~ /\/debug ([012])/) {
@@ -381,9 +415,17 @@ sub send_text { # {{{
 			$config->{debug} = $1;
 			add_text(Dumper($vyc->{'debug'}));
 		}
-		elsif ($text eq "/save") {
+		elsif ($text eq '/save') {
 			add_text("CFG saved");
 			cfg_save();
+		}
+		elsif ($text eq '/help') {
+			add_text("Commands: \n"
+				. "/topic [topic] - gets/sets topic\n"
+				. "/eval perl_cmd - evals expresion as perl\n"
+				. "/dump - dumps \$vyc object\n"
+				. "/debug [level] - gets/sets debug level\n"
+				. "/save - saves config");
 		}
 		else {
 			$vyc->chat($chan, $text);
@@ -450,10 +492,11 @@ sub update_user { # {{{
 } # }}}
 sub wMain_update { # {{{
 		my $topic = ($vyc->{'channels'}{$achan}{'topic'})
-		? $vyc->{'channels'}{$achan}{'topic'} : '';
-		my $title = $config->{'title'};
-		my $active = $vyc->num2active($vyc->{'users'}{$vyc->{'nick'}}{'active'});
-		my $status = $vyc->num2status($vyc->{'users'}{$vyc->{'nick'}}{'status'});
+			? $vyc->{'channels'}{$achan}{'topic'} : '';
+		my $active = 
+			$vyc->num2active($vyc->{'users'}{$vyc->{'nick'}}{'active'});
+		my $status = 
+			$vyc->num2status($vyc->{'users'}{$vyc->{'nick'}}{'status'});
 		my $port = $vyc->{'port'};
 		my $ip = $vyc->{'localip'};
 		$title =~ s/\%name/$progname/g;
@@ -488,13 +531,13 @@ sub on_eStatus_changed { # {{{
 	if ($status ne '') {
 		my $autoanswer = '';
 
-		if ($status ne '0') {
+		if ($status ne '0' && $config->{autoanswer_on}) {
 			my $gStatus = $gladexml->new_from_buffer($gladebuf, 'dStatus');
 			my $dStatus = $gStatus->get_widget('dStatus');
 			my $eAutoAnswerMessage = $gStatus->get_widget('eAutoAnswerMessage');
-			$eAutoAnswerMessage->set_text
-				($vyc->{users}{$vyc->{nick}}{autoanswer})
-				if $vyc->{users}{$vyc->{nick}}{autoanswer};
+			$eAutoAnswerMessage->set_text(
+				$vyc->{users}{$vyc->{nick}}{autoanswer}) if
+				$vyc->{users}{$vyc->{nick}}{autoanswer};
 
 			$dStatus->run;
 			$autoanswer = $eAutoAnswerMessage->get_text;
@@ -511,82 +554,81 @@ sub on_eTopic_activate { # {{{
 	$vyc->topic($achan, $eTopic->get_text);
 } # }}}
 sub pref_win { # {{{
+	my $switch_to_net = shift;
 	# Hell this is messy... Creating window again.
 	my $gPref = $gladexml->new_from_buffer($gladebuf, 'dPref');
 	my $dPref = $gPref->get_widget('dPref');
 
 	# We get these now, because if we don't change our selection and press OK 
 	# they get undef.
-	my $title = $config->{'title'};
 	my $TitleType = $config->{'TitleType'};
 
 	# Anyway we need to set custom widget string.
 	# We aren't going to lose anything...
-	my $eCustom = $gPref->get_widget('eCustom');
-	$eCustom->set_text($config->{'CustomTitle'}) if ($config->{'CustomTitle'});
+	my $eTitleCustom = $gPref->get_widget('eTitleCustom');
+	$eTitleCustom->set_text($config->{'CustomTitle'}) 
+		if $config->{'CustomTitle'};
 
 	# Now we define current widget behavior
-	if ($config->{'TitleType'} eq 'custom') {
-		$eCustom->set_sensitive(1);
+	if ($config->{'TitleType'} eq 'Custom') { # {{{
+		$eTitleCustom->set_sensitive(1);
 		$gPref->get_widget('rbCustom')->set_active(1);
 	}
-	elsif ($config->{'TitleType'} eq 'xchat') {
-		$gPref->get_widget('rbXChat')->set_active(1);
+	else {
+		$gPref->get_widget('rb' . $TitleType)->set_active(1);
 	}
-	elsif ($config->{'TitleType'} eq 'vyc') {
-		$gPref->get_widget('rbVyc')->set_active(1);
-	}
+	$gPref->get_widget('cbAutoanswer')->set_active($config->{autoanswer_on});
 	$gPref->get_widget('sbRefresh')->set_value($config->{'refresh'});
 	$gPref->get_widget('sbPort')->set_value($vyc->{'port'});
-	$gPref->get_widget('ceIp')->set_text($vyc->{'localip'});
+	$gPref->get_widget('ceIp')->set_text($vyc->{'localip'}); # }}}
 
 	# Ip combolist
-	my $interfaces = Sys::HostIP->interfaces;
+	my $interfaces = Sys::HostIP->interfaces; # {{{
 	my @ips;
 	unshift (@ips, $interfaces->{$_}." - ($_)") for (keys %$interfaces);
-	$gPref->get_widget('cIp')->set_popdown_strings(@ips);
+	$gPref->get_widget('cIp')->set_popdown_strings(@ips); # }}}
 	
 	# Radio buttons
-	$gPref->get_widget('rbXChat')->signal_connect('toggled' => sub {
-		$gPref->get_widget('eCustom')->set_sensitive(0);
-		$title = $gPref->get_widget('lXChat')->get_text;
-		$TitleType = 'xchat';
-	} );
-	$gPref->get_widget('rbVyc')->signal_connect('toggled' => sub {
-		$gPref->get_widget('eCustom')->set_sensitive(0);
-		$title = $gPref->get_widget('lVyc')->get_text;
-		$TitleType = 'vyc';
-	} );
-	$gPref->get_widget('rbCustom')->signal_connect('toggled' => sub {
-		$gPref->get_widget('eCustom')->set_sensitive(1);
-		$TitleType = 'custom';
-	} );
+	$gPref->get_widget('rbX-Chat')->signal_connect('toggled' => sub { # {{{
+		$gPref->get_widget('eTitleCustom')->set_sensitive(0);
+		$TitleType = 'X-Chat';
+	} ); 
+	$gPref->get_widget('rbVyc')->signal_connect('toggled' => sub { 
+		$gPref->get_widget('eTitleCustom')->set_sensitive(0);
+		$TitleType = 'Vyc';
+	} ); 
+	$gPref->get_widget('rbCustom')->signal_connect('toggled' => sub { 
+		$gPref->get_widget('eTitleCustom')->set_sensitive(1);
+		$TitleType = 'Custom';
+	} ); # }}}
+
+	# Do we wish to warn user about strange ip?
+	if ($switch_to_net) { # {{{
+		$gladexml->get_widget('nbPreferences')->set_current_page(1);
+		$gladexml->get_widget('lIpWarning')->show;
+		$gladexml->get_widget('iIpWarning')->show;
+	} # }}}
 	
 	my $response = $dPref->run;
 	
 	if ($response eq 'ok') {
-		# First we set title to predefined $title in case of !custom
-		$config->{'title'} = $title;
+		# Save title type and custom title
 		$config->{'TitleType'} = $TitleType;
+		$config->{'CustomTitle'} = $gPref->get_widget('eTitleCustom')->get_text;
 		
-		# And save custom title even it isn't active
-		$config->{'CustomTitle'} = $gPref->get_widget('eCustom')->get_text;
-		
-		# Then if it is custom, we change it to custom string. Stupid, eh? :-)
-		if ($TitleType eq 'custom') {
-			$config->{'title'} = $config->{'CustomTitle'};
-		}
 		$config->{'refresh'} = $gPref->get_widget('sbRefresh')->get_value;
 		my ($ceIp) = $gPref->get_widget('ceIp')->get_text 
 			=~ /^((\d{1,3}\.){3}\d{1,3})/;
 		$vyc->change_net($gPref->get_widget('sbPort')->get_value, $ceIp);
+		
+		$config->{autoanswer_on} = 
+			$gPref->get_widget('cbAutoanswer')->get_active;
 
 		# Destroy preferences window
 		$dPref->destroy;
-		# Save config
+		# Save and reload config
 		cfg_save();
-		# Reload config
-		cfg_update();
+		cfg_load();
 		# Update main window
 		wMain_update();
 		# Update userlist
