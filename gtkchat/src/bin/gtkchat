@@ -17,7 +17,7 @@ use Data::Dumper;
 my $progname = 'GtkChat';
 my $execname = lc $progname;
 my $achan = '#Main';
-my $ver = '0.41';
+my $ver = '0.42';
 my $codename = 'Bugs unleashed';
 
 my $sharedir = "$FindBin::Bin/../share/$execname/";
