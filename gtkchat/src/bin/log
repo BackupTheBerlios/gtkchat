@@ -1,0 +1,336 @@
+*** F: on_userlist, User: LinuxUser, Status: 0
+*** F: nick, Warn: network off.
+*** F: num2status, Status: Available
+*** F: num2active, Active: Inactive
+*** F: init_users, Status: Available, Active: Inactive, Gender: 0, AA: .
+*** Trying to open socket from 192.168.0.48 to port 8167...
+*** Success.
+*** Trying to open unicast socket from 192.168.0.48 to port 8167...
+*** Success.
+*** Trying to estabilsh socket on 192.168.0.48:8167...
+*** Success.
+*** F: on_chan, Nick: LinuxUser, Chan: #Main, Status: 0
+*** F: add_to_channel, Nick: LinuxUser, Chan: #Main
+*** F: join, Chan: #Main
+*** F: num2status, Status: Available
+*** F: num2active, Active: Inactive
+*** F: init_users, Status: Available, Active: Inactive, Gender: 0, AA: .
+*** Asked who is here with nick LinuxUser
+*** F: num2active, Active: Inactive
+*** F: num2status, Status: Available
+*** F: on_chan, Nick: LinuxUser, Chan: #Main, Status: 1
+*** F: num2status, Status: Available
+*** F: recognise, T: join, From: LinuxUser, Chan: #Main, Status: Available
+*** F: num2status, Status: Available
+*** F: recognise, Type: who, From: LinuxUser
+*** F: num2status, Status: Available
+*** F: num2active, Active: Active
+*** F: i_am_here, To: LinuxUser, Nick: LinuxUser, Status: Available, Active: Active
+*** F: num2status, Status: Available
+*** F: num2active, Active: Active
+*** F: recognise, T: who_ack, From: LinuxUser, Status: Available, Active: Active
+*** F: on_chan, Nick: LinuxUser, Chan: #Main, Status: 1
+*** F: on_userlist, User: vAIDS, Status: 0
+*** F: num2status, Status: DND
+*** F: num2active, Active: Inactive
+*** F: recognise, T: who_ack, From: vAIDS, Status: DND, Active: Inactive
+*** F: on_chan, Nick: vAIDS, Chan: #Main, Status: 0
+*** F: add_to_channel, Nick: vAIDS, Chan: #Main
+*** Topic for #Main [vaids.lan 192.168.0.22]:
+http://rasnet.afraid.org/site/node/view/46 (arturaz) test (LinuxUser) sin (LinuxUser)
+*** F: num2active, Active: Active
+*** F: num2status, Status: Available
+*** F: on_userlist, User: Indrute, Status: 0
+*** F: num2status, Status: Available
+*** F: num2active, Active: Inactive
+*** F: recognise, T: who_ack, From: Indrute, Status: Available, Active: Inactive
+*** F: on_chan, Nick: Indrute, Chan: #Main, Status: 0
+*** F: add_to_channel, Nick: Indrute, Chan: #Main
+*** Topic for #Main is already known.
+*** F: on_userlist, User: vAIDS, Status: 1
+*** F: on_userlist, User: Indrute, Status: 1
+*** F: on_userlist, User: zulikas, Status: 0
+*** F: num2status, Status: Away
+*** F: num2active, Active: Inactive
+*** F: recognise, T: who_ack, From: zulikas, Status: Away, Active: Inactive
+*** F: on_chan, Nick: zulikas, Chan: #Main, Status: 0
+*** F: add_to_channel, Nick: zulikas, Chan: #Main
+*** F: on_userlist, User: IRON-WOLF, Status: 0
+*** F: num2status, Status: Available
+*** F: num2active, Active: Inactive
+*** F: recognise, T: who_ack, From: IRON-WOLF, Status: Available, Active: Inactive
+*** F: on_chan, Nick: IRON-WOLF, Chan: #Main, Status: 0
+*** F: add_to_channel, Nick: IRON-WOLF, Chan: #Main
+*** Topic for #Main is already known.
+*** F: on_userlist, User: SavaS, Status: 0
+*** F: num2status, Status: DND
+*** F: num2active, Active: Inactive
+*** F: recognise, T: who_ack, From: SavaS, Status: DND, Active: Inactive
+*** F: on_chan, Nick: SavaS, Chan: #Main, Status: 0
+*** F: add_to_channel, Nick: SavaS, Chan: #Main
+*** Topic for #Main is already known.
+*** F: on_userlist, User: arturaz, Status: 0
+*** F: num2status, Status: DND
+*** F: num2active, Active: Inactive
+*** F: recognise, T: who_ack, From: arturaz, Status: DND, Active: Inactive
+*** F: on_chan, Nick: arturaz, Chan: #Main, Status: 0
+*** F: add_to_channel, Nick: arturaz, Chan: #Main
+*** Topic for #Main is already known.
+*** F: on_userlist, User: SaRaS, Status: 0
+*** F: num2status, Status: Available
+*** F: num2active, Active: Active
+*** F: recognise, T: who_ack, From: SaRaS, Status: Available, Active: Active
+*** F: on_chan, Nick: SaRaS, Chan: #Main, Status: 0
+*** F: add_to_channel, Nick: SaRaS, Chan: #Main
+*** F: on_userlist, User: SavaS, Status: 1
+*** F: on_userlist, User: zulikas, Status: 1
+*** Topic for #Main is already known.
+*** F: on_userlist, User: liaulius, Status: 0
+*** F: num2status, Status: Available
+*** F: num2active, Active: Inactive
+*** F: recognise, T: who_ack, From: liaulius, Status: Available, Active: Inactive
+*** F: on_chan, Nick: liaulius, Chan: #Main, Status: 0
+*** F: add_to_channel, Nick: liaulius, Chan: #Main
+*** Topic for #Main is already known.
+*** F: on_userlist, User: liaulius, Status: 1
+*** F: on_userlist, User: GIEDRE, Status: 0
+*** F: num2status, Status: DND
+*** F: num2active, Active: Inactive
+*** F: recognise, T: who_ack, From: GIEDRE, Status: DND, Active: Inactive
+*** F: on_chan, Nick: GIEDRE, Chan: #Main, Status: 0
+*** F: add_to_channel, Nick: GIEDRE, Chan: #Main
+*** F: num2active, Active: Active
+*** F: active, Active: Active
+*** F: num2active, Active: Active
+*** F: num2status, Status: Available
+*** Topic for #Main is already known.
+*** F: on_userlist, User: GIEDRE, Status: 1
+*** F: on_userlist, User: IRON-WOLF, Status: 1
+*** F: on_userlist, User: Mynde, Status: 0
+*** F: num2status, Status: DND
+*** F: num2active, Active: Inactive
+*** F: recognise, T: who_ack, From: Mynde, Status: DND, Active: Inactive
+*** F: on_chan, Nick: Mynde, Chan: #Main, Status: 0
+*** F: add_to_channel, Nick: Mynde, Chan: #Main
+*** F: on_userlist, User: arturaz, Status: 1
+*** Topic for #Main is already known.
+*** F: on_userlist, User: AIWA, Status: 0
+*** F: num2status, Status: Available
+*** F: num2active, Active: Inactive
+*** F: recognise, T: who_ack, From: AIWA, Status: Available, Active: Inactive
+*** F: on_chan, Nick: AIWA, Chan: #Main, Status: 0
+*** F: add_to_channel, Nick: AIWA, Chan: #Main
+*** F: on_userlist, User: AIWA, Status: 1
+*** Topic for #Main is already known.
+*** F: on_userlist, User: Tomas, Status: 0
+*** F: num2status, Status: DND
+*** F: num2active, Active: Inactive
+*** F: recognise, T: who_ack, From: Tomas, Status: DND, Active: Inactive
+*** F: on_chan, Nick: Tomas, Chan: #Main, Status: 0
+*** F: add_to_channel, Nick: Tomas, Chan: #Main
+*** Topic for #Main is already known.
+*** F: on_userlist, User: Tomas, Status: 1
+*** LinuxUser became active
+*** F: on_userlist, User: audjus, Status: 0
+*** F: num2status, Status: DND
+*** F: num2active, Active: Inactive
+*** F: recognise, T: who_ack, From: audjus, Status: DND, Active: Inactive
+*** F: on_chan, Nick: audjus, Chan: #Main, Status: 0
+*** F: add_to_channel, Nick: audjus, Chan: #Main
+*** Topic for #Main is already known.
+*** F: on_userlist, User: audjus, Status: 1
+*** F: on_userlist, User: Be proto, Status: 0
+*** F: num2status, Status: Available
+*** F: num2active, Active: Inactive
+*** F: recognise, T: who_ack, From: Be proto, Status: Available, Active: Inactive
+*** F: on_chan, Nick: Be proto, Chan: #Main, Status: 0
+*** F: add_to_channel, Nick: Be proto, Chan: #Main
+*** Topic for #Main is already known.
+*** F: on_userlist, User: Be proto, Status: 1
+*** F: usend_chan, Chan: #Main
+*** F: usend, To: LinuxUser, Ip: 192.168.0.48
+*** F: usend, To: vAIDS, Ip: 192.168.0.22
+*** F: usend, To: Indrute, Ip: 192.168.0.32
+*** F: usend, To: zulikas, Ip: 192.168.0.47
+*** F: usend, To: IRON-WOLF, Ip: 192.168.0.25
+*** F: usend, To: SavaS, Ip: 192.168.0.15
+*** F: usend, To: arturaz, Ip: 192.168.0.3
+*** F: usend, To: SaRaS, Ip: 192.168.0.29
+*** F: usend, To: liaulius, Ip: 192.168.0.45
+*** F: usend, To: GIEDRE, Ip: 192.168.0.37
+*** F: usend, To: Mynde, Ip: 192.168.0.7
+*** F: usend, To: AIWA, Ip: 192.168.0.19
+*** F: usend, To: Tomas, Ip: 192.168.0.11
+*** F: usend, To: audjus, Ip: 192.168.0.4
+*** F: usend, To: Be proto, Ip: 192.168.0.43
+*** Sent chat string to #Main: as
+*** F: on_userlist, User: LinuxUser, Status: 1
+*** F: on_chan, Nick: LinuxUser, Chan: #Main, Status: 1
+*** #Main:<LinuxUser> as
+*** arturaz became active
+*** arturaz became inactive
+*** F: usend_chan, Chan: #Main
+*** F: usend, To: LinuxUser, Ip: 192.168.0.48
+*** F: usend, To: vAIDS, Ip: 192.168.0.22
+*** F: usend, To: Indrute, Ip: 192.168.0.32
+*** F: usend, To: zulikas, Ip: 192.168.0.47
+*** F: usend, To: IRON-WOLF, Ip: 192.168.0.25
+*** F: usend, To: SavaS, Ip: 192.168.0.15
+*** F: usend, To: arturaz, Ip: 192.168.0.3
+*** F: usend, To: SaRaS, Ip: 192.168.0.29
+*** F: usend, To: liaulius, Ip: 192.168.0.45
+*** F: usend, To: GIEDRE, Ip: 192.168.0.37
+*** F: usend, To: Mynde, Ip: 192.168.0.7
+*** F: usend, To: AIWA, Ip: 192.168.0.19
+*** F: usend, To: Tomas, Ip: 192.168.0.11
+*** F: usend, To: audjus, Ip: 192.168.0.4
+*** F: usend, To: Be proto, Ip: 192.168.0.43
+*** Sent chat string to #Main: yes!
+*** F: on_userlist, User: LinuxUser, Status: 1
+*** F: on_chan, Nick: LinuxUser, Chan: #Main, Status: 1
+*** #Main:<LinuxUser> yes!
+*** arturaz became active
+*** arturaz became inactive
+*** F: usend_chan, Chan: #Main
+*** F: usend, To: LinuxUser, Ip: 192.168.0.48
+*** F: usend, To: vAIDS, Ip: 192.168.0.22
+*** F: usend, To: Indrute, Ip: 192.168.0.32
+*** F: usend, To: zulikas, Ip: 192.168.0.47
+*** F: usend, To: IRON-WOLF, Ip: 192.168.0.25
+*** F: usend, To: SavaS, Ip: 192.168.0.15
+*** F: usend, To: arturaz, Ip: 192.168.0.3
+*** F: usend, To: SaRaS, Ip: 192.168.0.29
+*** F: usend, To: liaulius, Ip: 192.168.0.45
+*** F: usend, To: GIEDRE, Ip: 192.168.0.37
+*** F: usend, To: Mynde, Ip: 192.168.0.7
+*** F: usend, To: AIWA, Ip: 192.168.0.19
+*** F: usend, To: Tomas, Ip: 192.168.0.11
+*** F: usend, To: audjus, Ip: 192.168.0.4
+*** F: usend, To: Be proto, Ip: 192.168.0.43
+*** Sent chat string to #Main: phuk
+*** F: on_userlist, User: LinuxUser, Status: 1
+*** F: on_chan, Nick: LinuxUser, Chan: #Main, Status: 1
+*** #Main:<LinuxUser> phuk
+*** F: recognise, Type: who, From: Be proto
+*** F: num2status, Status: Available
+*** F: num2active, Active: Active
+*** F: i_am_here, To: Be proto, Nick: LinuxUser, Status: Available, Active: Active
+*** arturaz became active
+*** arturaz became inactive
+*** F: usend_chan, Chan: #Main
+*** F: usend, To: LinuxUser, Ip: 192.168.0.48
+*** F: usend, To: vAIDS, Ip: 192.168.0.22
+*** F: usend, To: Indrute, Ip: 192.168.0.32
+*** F: usend, To: zulikas, Ip: 192.168.0.47
+*** F: usend, To: IRON-WOLF, Ip: 192.168.0.25
+*** F: usend, To: SavaS, Ip: 192.168.0.15
+*** F: usend, To: arturaz, Ip: 192.168.0.3
+*** F: usend, To: SaRaS, Ip: 192.168.0.29
+*** F: usend, To: liaulius, Ip: 192.168.0.45
+*** F: usend, To: GIEDRE, Ip: 192.168.0.37
+*** F: usend, To: Mynde, Ip: 192.168.0.7
+*** F: usend, To: AIWA, Ip: 192.168.0.19
+*** F: usend, To: Tomas, Ip: 192.168.0.11
+*** F: usend, To: audjus, Ip: 192.168.0.4
+*** F: usend, To: Be proto, Ip: 192.168.0.43
+*** Sent chat string to #Main: !
+*** F: on_userlist, User: LinuxUser, Status: 1
+*** F: on_chan, Nick: LinuxUser, Chan: #Main, Status: 1
+*** #Main:<LinuxUser> !
+*** arturaz became active
+*** arturaz became inactive
+*** F: usend_chan, Chan: #Main
+*** F: usend, To: LinuxUser, Ip: 192.168.0.48
+*** F: usend, To: vAIDS, Ip: 192.168.0.22
+*** F: usend, To: Indrute, Ip: 192.168.0.32
+*** F: usend, To: zulikas, Ip: 192.168.0.47
+*** F: usend, To: IRON-WOLF, Ip: 192.168.0.25
+*** F: usend, To: SavaS, Ip: 192.168.0.15
+*** F: usend, To: arturaz, Ip: 192.168.0.3
+*** F: usend, To: SaRaS, Ip: 192.168.0.29
+*** F: usend, To: liaulius, Ip: 192.168.0.45
+*** F: usend, To: GIEDRE, Ip: 192.168.0.37
+*** F: usend, To: Mynde, Ip: 192.168.0.7
+*** F: usend, To: AIWA, Ip: 192.168.0.19
+*** F: usend, To: Tomas, Ip: 192.168.0.11
+*** F: usend, To: audjus, Ip: 192.168.0.4
+*** F: usend, To: Be proto, Ip: 192.168.0.43
+*** Sent chat string to #Main: ee!
+*** F: on_userlist, User: LinuxUser, Status: 1
+*** F: on_chan, Nick: LinuxUser, Chan: #Main, Status: 1
+*** #Main:<LinuxUser> ee!
+*** arturaz became active
+*** arturaz became inactive
+*** F: usend_chan, Chan: #Main
+*** F: usend, To: LinuxUser, Ip: 192.168.0.48
+*** F: usend, To: vAIDS, Ip: 192.168.0.22
+*** F: usend, To: Indrute, Ip: 192.168.0.32
+*** F: usend, To: zulikas, Ip: 192.168.0.47
+*** F: usend, To: IRON-WOLF, Ip: 192.168.0.25
+*** F: usend, To: SavaS, Ip: 192.168.0.15
+*** F: usend, To: arturaz, Ip: 192.168.0.3
+*** F: usend, To: SaRaS, Ip: 192.168.0.29
+*** F: usend, To: liaulius, Ip: 192.168.0.45
+*** F: usend, To: GIEDRE, Ip: 192.168.0.37
+*** F: usend, To: Mynde, Ip: 192.168.0.7
+*** F: usend, To: AIWA, Ip: 192.168.0.19
+*** F: usend, To: Tomas, Ip: 192.168.0.11
+*** F: usend, To: audjus, Ip: 192.168.0.4
+*** F: usend, To: Be proto, Ip: 192.168.0.43
+*** Sent chat string to #Main: test
+*** F: on_userlist, User: LinuxUser, Status: 1
+*** F: on_chan, Nick: LinuxUser, Chan: #Main, Status: 1
+*** #Main:<LinuxUser> test
+*** arturaz became active
+*** arturaz became inactive
+*** F: usend_chan, Chan: #Main
+*** F: usend, To: LinuxUser, Ip: 192.168.0.48
+*** F: usend, To: vAIDS, Ip: 192.168.0.22
+*** F: usend, To: Indrute, Ip: 192.168.0.32
+*** F: usend, To: zulikas, Ip: 192.168.0.47
+*** F: usend, To: IRON-WOLF, Ip: 192.168.0.25
+*** F: usend, To: SavaS, Ip: 192.168.0.15
+*** F: usend, To: arturaz, Ip: 192.168.0.3
+*** F: usend, To: SaRaS, Ip: 192.168.0.29
+*** F: usend, To: liaulius, Ip: 192.168.0.45
+*** F: usend, To: GIEDRE, Ip: 192.168.0.37
+*** F: usend, To: Mynde, Ip: 192.168.0.7
+*** F: usend, To: AIWA, Ip: 192.168.0.19
+*** F: usend, To: Tomas, Ip: 192.168.0.11
+*** F: usend, To: audjus, Ip: 192.168.0.4
+*** F: usend, To: Be proto, Ip: 192.168.0.43
+*** Sent chat string to #Main: wtf
+*** F: on_userlist, User: LinuxUser, Status: 1
+*** F: on_chan, Nick: LinuxUser, Chan: #Main, Status: 1
+*** #Main:<LinuxUser> wtf
+*** arturaz became active
+*** F: recognise, T: info, From: arturaz
+*** F: get_chans, Nick: LinuxUser, Chans: #Main
+*** F: usend, To: arturaz, Ip: 192.168.0.3
+*** F: info_ack, To: arturaz, Nick: LinuxUser, Host: h2ocolinux User: x11, IP: 192.168.0.48, Chans: #Main, AA: 
+*** audjus became active
+*** arturaz became inactive
+*** arturaz became active
+*** audjus became inactive
+*** F: recognise, Type: who, From: IRON-WOLF
+*** F: num2status, Status: Available
+*** F: num2active, Active: Active
+*** F: i_am_here, To: IRON-WOLF, Nick: LinuxUser, Status: Available, Active: Active
+*** F: on_userlist, User: arturaz, Status: 1
+*** F: on_chan, Nick: LinuxUser, Chan: #Main, Status: 1
+*** #Main:<arturaz> aha
+*** arturaz became inactive
+*** F: num2active, Active: Inactive
+*** F: active, Active: Inactive
+*** F: num2active, Active: Inactive
+*** F: num2status, Status: Available
+*** LinuxUser became inactive
+*** F: num2active, Active: Active
+*** F: active, Active: Active
+*** F: num2active, Active: Active
+*** F: num2status, Status: Available
+*** LinuxUser became active
+*** F: get_chans, Nick: LinuxUser, Chans: #Main
+#Main*** F: on_chan, Nick: LinuxUser, Chan: #Main, Status: 1
+*** F: delete_from_channel, Nick: LinuxUser, Chan: #Main
+*** F: part, Chan: #Main
