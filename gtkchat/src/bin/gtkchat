@@ -244,6 +244,10 @@ sub do_stuff { # {{{
 			my $str = "M${mass}essage from $user";
 			$gMsg->get_widget('lNick')->set_text($str.':');
 			$wMsg->set_title($str);
+
+			# For OS compliance - change the newline chars
+			$msg =~ s/\r\n/\n/g;
+			$msg =~ s/\r/\n/g;
 			$gMsg->get_widget('tvMsg')->get_buffer->set_text($msg);
 			
 			# Signal for reply button.
@@ -254,7 +258,7 @@ sub do_stuff { # {{{
 			# Signal for quote button.
 			$gMsg->get_widget('bQuote')->signal_connect('clicked' => sub { # {{{
 				$wMsg->destroy;
-				$msg =~ s/^/\>/gm;
+				$msg =~ s/^/>/gm;
 				$msg = "\n$msg";
 				compose_msg($user, $msg);
 			} ); # }}}
@@ -385,12 +389,16 @@ sub entry_press { # {{{
 #		$history_item++;
 #	}	
 } # }}}
+sub add_to_history { # {{{
+	my $text = shift;
+	splice(@text_history, 1, 0, $text);
+} # }}}
 sub on_eTalk_activate { # {{{
 	my $chan = '#Main';
 	my $eTalk = $gladexml->get_widget('eTalk');
 	my $text = $eTalk->get_text;
 	if ($text) {
-		push @text_history, $text;
+		add_to_history($text);
 		$eTalk->set_text('');
 		if ($text eq "/topic") {
 			add_text("--- Topic for $achan is \""
@@ -451,6 +459,8 @@ sub on_eTalk_key_press_event { # {{{
 		$event->keyval == $Gtk2::Gdk::Keysyms{Up} ||
 		$event->keyval == $Gtk2::Gdk::Keysyms{Down}
 	) {
+	#	my $text = $gladexml->get_widget('eTalk')->get_text;
+	#	add_to_history($text) if $text;
 		my $history_max = @text_history;
 		
 		# If history buffer ain't empty
@@ -485,10 +495,12 @@ sub add_text { # {{{
 	$textview = $buffer{$achan} unless defined $textview;
 
 	my $iter = $textview->get_end_iter;
-	$textview->insert($iter, "\n".$text);
+	$textview->insert($iter, "\n" . $text);
 	Glib::Idle->add(sub { 
 		$iter = $textview->get_end_iter;
-		$gladexml->get_widget('TextView')->scroll_to_iter ($iter, 0, 1, 0, 0);
+		$gladexml->get_widget('TextView')->scroll_to_iter($iter, FALSE, TRUE,
+			0, 1);
+		return TRUE;
 	});
 } # }}}
 sub add_user { # {{{
