@@ -624,12 +624,13 @@
 
 		  <child>
 		    <widget class="GtkButton" id="bUsers">
+		      <property name="visible">True</property>
 		      <property name="can_focus">True</property>
 		      <property name="label" translatable="yes">Users: 1</property>
 		      <property name="use_underline">True</property>
 		      <property name="relief">GTK_RELIEF_NONE</property>
 		      <property name="focus_on_click">True</property>
-		      <signal name="clicked" handler="refresh_users" last_modification_time="Fri, 05 Dec 2003 13:33:46 GMT"/>
+		      <signal name="clicked" handler="tvUsers_refresh" last_modification_time="Thu, 15 Jul 2004 21:19:19 GMT"/>
 		    </widget>
 		    <packing>
 		      <property name="type">label_item</property>

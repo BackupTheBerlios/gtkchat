@@ -77,7 +77,7 @@ my $UserList = Gtk2::SimpleList->new_from_treeview($gladexml->get_widget('UserTr
 
 # listen on udp
 my $listen = Gtk2::Helper->add_watch ( $vyc->{listen}->fileno, "in",
-	&do_stuff );
+	\&do_stuff );
 # set status on toolbar
 $gladexml->get_widget('iStatus')->set_from_pixbuf
 	($pix{'1'.$vyc->{'users'}{$vyc->{'nick'}}{'status'}});
@@ -173,7 +173,7 @@ sub do_stuff { # {{{
 	} # }}}
 	elsif ($type eq "join") { # {{{
 		my ($who, $chan, $status) = @r;
-		add_text("--> $who joined $chan (".$vyc->num2status($status).")",
+		add_text("--> $who joined $chan (". $vyc->num2status($status) .")",
 			$buffer{$chan});
 		add_user($who) if !find_user($who);
 	} # }}}
@@ -469,15 +469,15 @@ sub wMain_update { # {{{
 		$gladexml->get_widget('wMain')->set_title($title);
 } # }}}
 sub tvUsers_refresh { # {{{
-		@{$UserList->{'data'}} = ();
-		$vyc->who();
-		return 1;
+	@{$UserList->{'data'}} = ();
+	$vyc->who;
+	return TRUE;
 } # }}}
 sub bUsers_update { # {{{
-		my $users = keys %{$vyc->{'users'}};
-		$UserList->get_model->set_sort_column_id(1,
+	my $users = keys %{$vyc->{'users'}};
+	$UserList->get_model->set_sort_column_id(1,
 		"GTK_SORT_".$config->{'sorting'});
-		$gladexml->get_widget('bUsers')->set_label("Users: $users");
+	$gladexml->get_widget('bUsers')->set_label("Users: $users");
 } # }}}
 sub on_eStatus_changed { # {{{
 	my $status = $gladexml->get_widget('eStatus')->get_text;
