@@ -1,10 +1,11 @@
 --- #YAML:1.0
 CustomTitle: '%ip:%port [%nick @ %chan / %status]'
-TitleType: xchat
-nick: default
+TitleType: Vyc
+autoanswer:
+autoanswer_on: 1
+debug: 0
+nick: Chatter
 port: 8167
-refresh: 300
-status: 0
-title: '%name [%ver]: %nick / %chan'
+refresh: 30
 sorting: ASCENDING
-
+status: 0
