@@ -41,9 +41,8 @@ $gladexml->get_widget('hPaned')->child1_resize(1);
 $gladexml->get_widget('hPaned')->child2_resize(0);
 
 # textbuffers hash
-my %buffer = (
-	"#Main" => Gtk2::TextBuffer->new
-);
+my %buffer;
+init_TextBuffer('#Main');
 # tooltips hash'es
 my (%topic_tips, %user_tips);
 
@@ -109,6 +108,15 @@ my $history_item = 0;
 wMain_update(); # update title
 Gtk2->main; # go and away!
 
+sub init_TextBuffer { # {{{
+	my $name = shift;
+	$buffer{$name} = Gtk2::TextBuffer->new;
+	$buffer{$name}->create_mark('end', $buffer{$name}->get_end_iter, FALSE);
+	$buffer{$name}->signal_connect('insert_text' => sub {
+		$gladexml->get_widget('TextView')->scroll_to_mark(
+			$buffer{$name}->get_mark('end'), 0.0, TRUE, 0, 0.5);
+	} );
+} # }}}
 sub cfg_load { # {{{
 	my $restore = shift;
 	# Let's load cfg
@@ -491,17 +499,11 @@ sub on_eTalk_key_press_event { # {{{
 	} # }}}
 } # }}}
 sub add_text { # {{{
-	my ($text, $textview) = @_;
-	$textview = $buffer{$achan} unless defined $textview;
+	my ($text, $textbuf) = @_;
+	$textbuf = $buffer{$achan} unless defined $textbuf;
 
-	my $iter = $textview->get_end_iter;
-	$textview->insert($iter, "\n" . $text);
-	Glib::Idle->add(sub { 
-		$iter = $textview->get_end_iter;
-		$gladexml->get_widget('TextView')->scroll_to_iter($iter, FALSE, TRUE,
-			0, 1);
-		return TRUE;
-	});
+	my $iter = $textbuf->get_end_iter;
+	$textbuf->insert($iter, "\n" . $text);
 } # }}}
 sub add_user { # {{{
 	my $user = shift;
