@@ -1,0 +1,10 @@
+--- #YAML:1.0
+CustomTitle: '%ip:%port [%nick @ %chan / %status]'
+TitleType: xchat
+nick: default
+port: 8167
+refresh: 300
+status: 0
+title: '%name [%ver]: %nick / %chan'
+sorting: ASCENDING
+
